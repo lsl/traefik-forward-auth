@@ -62,7 +62,7 @@ func TestValidateCookie(t *testing.T) {
   }
 }
 
-func TestValidateEmail(t *testing.T) {
+func TestValidateEmailDomain(t *testing.T) {
   fw = &ForwardAuth{}
 
   // Should allow any
@@ -80,6 +80,36 @@ func TestValidateEmail(t *testing.T) {
   fw.Domain = []string{"test.com"}
   if !fw.ValidateEmail("test@test.com") {
     t.Error("Should allow user from allowed domain")
+  }
+}
+
+func TestValidateEmail(t *testing.T) {
+  fw = &ForwardAuth{}
+
+  // Should allow any
+  if !fw.ValidateEmail("test@test.com") || !fw.ValidateEmail("one@two.com") {
+    t.Error("Should allow any email if email is not defined")
+  }
+
+  // Should block non matching email
+  fw.Email = []string{"test@test.com"}
+  if fw.ValidateEmail("one@two.com") {
+    t.Error("Should not allow non matching emails")
+  }
+
+  // Should allow matching domain
+  fw.Email = []string{"test@test.com"}
+  if !fw.ValidateEmail("test@test.com") {
+    t.Error("Should allow matching email")
+  }
+
+  fw.Email = []string{"test@test.com","test@example.com"}
+  if !fw.ValidateEmail("test@test.com") {
+    t.Error("Should first email in list")
+  }
+
+  if !fw.ValidateEmail("test@example.com") {
+    t.Error("Should any email in list")
   }
 }
 
